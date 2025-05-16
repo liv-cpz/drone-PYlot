@@ -49,3 +49,15 @@ qtcreator-*
 
 # Catkin custom files
 CATKIN_IGNORE
+
+
+# ROS2 stuff
+install/
+log/
+build/
+
+# Python Stuff
+.vscode
+.pytest_cache/
+__pycache__/
+.venv
