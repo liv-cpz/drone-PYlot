@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>aruco_det</name>
+  <version>0.0.1</version>
+  <description>ArUco marker detection with OpenCV and ROS 2</description>
+
+  <maintainer email="flia2173@uni.sydney.edu.au">flora</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>opencv4</depend>
+  <depend>yaml-cpp</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
