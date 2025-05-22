@@ -37,29 +37,25 @@ class ArucoTrajectoryEstimator:
 
     def predict_trajectory(self, n_points=30):
         """
-        Predict the next n_points based on average velocity from the last 25 smoothed trajectory points,
-        starting from the average position of those points.
+        Predict the next n_points based on linear projection of the smoothed trajectory.
         :param n_points: Number of future points to predict.
         :return: np.ndarray of shape (n_points, 2)
         """
         smoothed = self.get_smoothed_trajectory()
-        n_pts_for_velocity = 25
-
+        
         if len(smoothed) < 2:
-            return np.array([])  # Not enough data to predict
+            return np.array([])  # Need at least 2 points for linear projection
 
-        # Use up to the last n points (or fewer if not enough)
-        recent_points = smoothed[-n_pts_for_velocity:]
-
-        # Calculate velocity vectors between consecutive points
-        velocities = np.diff(recent_points, axis=0)
-
-        # Average velocity vector
-        avg_velocity = np.mean(velocities, axis=0)
-
-        # Average position of recent points (not just last point)
-        avg_position = np.mean(recent_points, axis=0)
-
-        # Generate predicted points starting from avg_position using average velocity
-        predictions = [avg_position + avg_velocity * (i + 1) for i in range(n_points)]
-        return np.array(predictions)
+        # Create time indices
+        t = np.arange(len(smoothed))
+        t_future = np.arange(len(smoothed), len(smoothed) + n_points)
+        
+        # Linear fit for x coordinates (slope and intercept)
+        slope_x, intercept_x = np.polyfit(t, smoothed[:, 0], 1)
+        x_pred = intercept_x + slope_x * t_future
+        
+        # Linear fit for y coordinates (slope and intercept)
+        slope_y, intercept_y = np.polyfit(t, smoothed[:, 1], 1)
+        y_pred = intercept_y + slope_y * t_future
+        
+        return np.stack((x_pred, y_pred), axis=1)
