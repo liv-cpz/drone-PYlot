@@ -88,6 +88,13 @@ class TestArucoTrajectoryEstimator(unittest.TestCase):
         eq = f"y = {m:.2f} x + {b:.2f}"
         self._run_test(gt, "Random Line", eq)
 
+    def test_left_direction(self):
+        m = np.random.uniform(-3, -1)  # Negative slope for left direction
+        b = np.random.uniform(100, 200)
+        gt = [(300 - i * 5, m * (300 - i * 5) + b) for i in range(30)]
+        eq = f"y = {m:.2f} x + {b:.2f} (left direction)"
+        self._run_test(gt, "Left Direction Line", eq)
+
     def test_parabolic_one_arm(self):
         a = 0.02
         h = 10
