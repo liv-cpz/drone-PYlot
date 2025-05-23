@@ -9,7 +9,13 @@ Daniel this isn't very nice of you. I'm telling your mum
 [![Test Template](https://github.com/liv-cpz/slam_traffic/actions/workflows/ci_actions.yml/badge.svg)](https://github.com/liv-cpz/slam_traffic/actions/workflows/ci_actions.yml) [![linting: pylint](https://img.shields.io/badge/linting-pylint-yellowgreen)](https://github.com/pylint-dev/pylint)
 
 
-
+## UGV02
+Linux
+```
+sudo chmod 666 <port>
+cd ~/ros2_ws/src/drone-PYlot/src/UGV
+python3 UGV.py
+```
 
 
 ## General Project Structure
