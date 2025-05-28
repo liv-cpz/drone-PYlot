@@ -3,18 +3,18 @@
 #include <Arduino_LSM6DS3.h>
 
 // Set to 1 for serial debugging
-bool DEBUGGING = 0;
+bool DEBUGGING = 1;
 
 // Create bluetooth service:
 BLEService IMUService("082b91ae-e83c-11e8-9f32-f2801f1b9fd1");
 
-// Create bluetooth characteristics to write readings to
-BLEIntCharacteristic accelX("082b9438-e83c-11e8-9f32-f2801f1b9fd1", BLEWrite);
-BLEIntCharacteristic accelY("082b9622-e83c-11e8-9f32-f2801f1b9fd1", BLEWrite);
-BLEIntCharacteristic accelZ("082b976c-e83c-11e8-9f32-f2801f1b9fd1", BLEWrite);
-BLEIntCharacteristic gyroX("082b9439-e83c-11e8-9f32-f2801f1b9fd1", BLEWrite);
-BLEIntCharacteristic gyroY("082b9623-e83c-11e8-9f32-f2801f1b9fd1", BLEWrite);
-BLEIntCharacteristic gyroZ("082b976d-e83c-11e8-9f32-f2801f1b9fd1", BLEWrite);
+// Create bluetooth characteristics to write readings
+BLEFloatCharacteristic accelX("082b9438-e83c-11e8-9f32-f2801f1b9fd1", BLERead | BLEWrite | BLENotify);
+BLEFloatCharacteristic accelY("082b9622-e83c-11e8-9f32-f2801f1b9fd1", BLERead | BLEWrite | BLENotify);
+BLEFloatCharacteristic accelZ("082b976c-e83c-11e8-9f32-f2801f1b9fd1", BLERead | BLEWrite | BLENotify);
+BLEFloatCharacteristic gyroX("082b9439-e83c-11e8-9f32-f2801f1b9fd1", BLERead | BLEWrite | BLENotify);
+BLEFloatCharacteristic gyroY("082b9623-e83c-11e8-9f32-f2801f1b9fd1", BLERead | BLEWrite | BLENotify);
+BLEFloatCharacteristic gyroZ("082b976d-e83c-11e8-9f32-f2801f1b9fd1", BLERead | BLEWrite | BLENotify);
 
 // IMU floats
 float accX, accY, accZ; 
