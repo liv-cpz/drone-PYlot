@@ -8,6 +8,30 @@ Daniel this isn't very nice of you. I'm telling your mum
 
 [![Test Template](https://github.com/liv-cpz/slam_traffic/actions/workflows/ci_actions.yml/badge.svg)](https://github.com/liv-cpz/slam_traffic/actions/workflows/ci_actions.yml) [![linting: pylint](https://img.shields.io/badge/linting-pylint-yellowgreen)](https://github.com/pylint-dev/pylint)
 
+## Arduino BLE
+
+### Dependencies
+
+```
+sudo apt-get install python3-pip libglib2.0-dev
+sudo pip3 install bluepy
+curl -fsSL -o get-platformio.py https://raw.githubusercontent.com/platformio/platformio-core-installer/master/get-platformio.py
+python3 get-platformio.py
+```
+
+### Usage
+
+Arduino
+```
+cd ~/ros2_ws/src/drone-PYlot/src/IMU
+platformio run --target build
+```
+
+BLE Receiver
+```
+cd ~/ros2_ws/src/drone-PYlot/src
+sudo python3 IMU_receiver.py
+```
 
 ## UGV02
 Linux
