@@ -135,36 +135,64 @@ class VisualOdometryIMU():
 
 
     def update_imu(self, dt=0.09):
-        """
-        Simple approach: use gyroscope for rotation, skip double integration
-        """
-        dt = 0.09
-        alpha = self.RC/(self.RC + dt)
+        # Raw accelerometer in IMU frame
+        imu_accel = np.array([
+            self.imu_current["agx"],
+            self.imu_current["agy"], 
+            self.imu_current["agz"]
+        ])
+        
+        # Subtract gravity
+        corrected_accel = imu_accel - self.g
 
-        self.acceleration_current = np.array([self.imu_current["agx"],
-                                 self.imu_current["agy"],
-                                 self.imu_current["agz"]], dtype=np.float64)
-        
-        R = self.euler_to_rotation_matrix(self.imu_current["roll"],
-                                      self.imu_current["pitch"],
-                                      self.imu_current["yaw"])
-        
-        self.acceleration_current -= self.g
-        self.acceleration_current = self.R_cam_imu @ self.acceleration_current
-        
-        accel_hp = alpha * (self.acceleration_HP + self.acceleration_current -  self.acceleration_prev)
-        
-        self.velocity_current = self.velocity_prev + 0.5*(accel_hp+self.acceleration_HP) * dt
-        self.position_current = self.position_prev + self.velocity_prev * dt+0.25 * (accel_hp +self.acceleration_HP) * dt**2
-        
-        d_vo = self.position_current - self.position_prev
-        self.acceleration_HP = accel_hp
-        self.acceleration_prev = self.acceleration_current.copy()
+        # Rotate to camera/world frame
+        accel_cam = self.R_cam_imu @ corrected_accel
+
+        # Optional: flip y if your camera frame is reversed (experimentally determined)
+        accel_cam[1] *= -1
+
+        # Initialize filter states if needed
+        if not hasattr(self, 'accel_lp_prev'):
+            self.accel_lp_prev = accel_cam.copy()
+            self.accel_hp_prev = np.zeros(3)
+            self.velocity_current = np.zeros(3)
+            self.position_current = np.zeros(3)
+            self.velocity_prev = np.zeros(3)
+            self.position_prev = np.zeros(3)
+            self.acceleration_prev = np.zeros(3)
+
+        # Adaptive or per-axis alphas (tuneable)
+        alpha_lp = np.array([0.1, 0.1, 0.2])  # X, Y, Z — slightly more responsive Y
+        alpha_hp = np.array([0.95, 0.95, 0.95])  # Uniform, mild high-pass
+
+
+        # Low-pass filter (per axis)
+        accel_lp = alpha_lp * accel_cam + (1 - alpha_lp) * self.accel_lp_prev
+
+        # High-pass filter (per axis)
+        accel_hp = alpha_hp * (self.accel_hp_prev + accel_lp - self.accel_lp_prev)
+
+        # Update filter states
+        self.accel_lp_prev = accel_lp.copy()
+        self.accel_hp_prev = accel_hp.copy()
+
+        # Use band-pass filtered acceleration
+        filtered_accel = accel_hp
+
+        # Integrate using trapezoidal rule for smoother numerical integration
+        self.velocity_current = self.velocity_prev + 0.5 * (self.acceleration_prev + filtered_accel) * dt
+        self.position_current = self.position_prev + self.velocity_prev * dt + 0.25 * (self.acceleration_prev + filtered_accel) * dt**2
+
+        # Displacement vector
+        displacement = self.position_current - self.position_prev
+
+        # Update previous values
+        self.acceleration_prev = filtered_accel.copy()
         self.velocity_prev = self.velocity_current.copy()
         self.position_prev = self.position_current.copy()
-        self.imu_prev = self.imu_current.copy()
 
-        return np.linalg.norm(d_vo)
+        return np.linalg.norm(displacement)
+
 
     def get_matches(self, img1, img2, number_features=200, wz=5, level=5, number_iteration=70, inlier_threshold=3, static=False):
         q1, q2, _ = lucas_pyramidal(img1, img2, number_features, wz, level, number_iteration, inlier_threshold, static)

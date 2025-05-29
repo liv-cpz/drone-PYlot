@@ -147,9 +147,9 @@ def main():
             # Initialize pose
             t = np.array([0.316238,0.05039,-0.024567])
             # Parse initial orientation
-            initial_roll = float(entry.get('roll', 0))
-            initial_pitch = float(entry.get('pitch', 0))
-            initial_yaw = float(entry.get('yaw', 0))
+            initial_roll = float(entry.get('roll', -0.59889))
+            initial_pitch = float(entry.get('pitch', 4.417175))
+            initial_yaw = float(entry.get('yaw', -0.095317))
             
             tello_dict["roll"] = initial_roll
             tello_dict["pitch"] = initial_pitch
@@ -256,7 +256,7 @@ def main():
         ax2.scatter(positions[-1, 0], positions[-1, 1], c='red', s=100, label='End', marker='s')
         ax2.plot(gt_positions[:, 0], gt_positions[:, 1], 
                     'r--', linewidth=1, label='Ground Truth', alpha=0.5)
-        ax2.set_xlabel('X (m)')s
+        ax2.set_xlabel('X (m)')
         ax2.set_ylabel('Y (m)')
         ax2.set_title('Top-Down View (XY Plane)')
         ax2.legend()
