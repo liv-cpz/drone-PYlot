@@ -24,7 +24,7 @@ python3 get-platformio.py
 Arduino
 ```
 cd ~/ros2_ws/src/drone-PYlot/src/IMU
-platformio run --target build
+platformio run --target upload
 ```
 
 BLE Receiver
