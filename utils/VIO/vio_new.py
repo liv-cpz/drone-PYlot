@@ -57,20 +57,25 @@ class VisualOdometryIMU():
         self.imu_prev = None
 
         self.ekf = EKFVOIMU()
+
+        # Define coordinate frames clearly
+        # World frame: NED (North-East-Down)
+        # Camera frame: Right-Down-Forward (typical computer vision)
+        # IMU frame: NED (North-East-Down)
         self.g = np.array([0, 0, -9.81])  # gravity in NED frame
 
-        # IMU integration variables
-        self.acceleration_current = np.array([0.0, 0.0, 0.0], dtype=np.float64)
+        # IMU integration variables in world frame
+        self.acceleration_world = np.array([0.0, 0.0, 0.0], dtype=np.float64)
         self.acceleration_prev = np.array([0.0, 0.0, 0.0], dtype=np.float64)
         self.acceleration_HP = np.array([0.0, 0.0, 0.0], dtype=np.float64)
 
-        self.velocity_current = np.array([0.0, 0.0, 0.0], dtype=np.float64)
+        self.velocity_world = np.array([0.0, 0.0, 0.0], dtype=np.float64)
         self.velocity_prev = np.array([0.0, 0.0, 0.0], dtype=np.float64)
-        self.position_current = np.array([0.0, 0.0, 0.0], dtype=np.float64)
+        self.position_world = np.array([0.0, 0.0, 0.0], dtype=np.float64)
         self.position_prev = np.array([0.0, 0.0, 0.0], dtype=np.float64)
 
-        # Current orientation (needed for gravity compensation)
-        self.current_rotation = np.eye(3)
+        # Current orientation (rotation from world to body frame)
+        self.R_world_to_body = np.eye(3)
         
         self.estimated_path = []
         self.frame_idx = 0
@@ -78,18 +83,22 @@ class VisualOdometryIMU():
 
         self.RC = 0.9
        
-        # Try identity first to debug coordinate issues
-                # Fixed coordinate transformation - this addresses the Z-axis inversion
-        self.R_cam_to_world = np.array([
-            [1,  0,  0],   # Keep X as is
-            [0,  1,  0],   # Keep Y as is  
-            [0,  0, -1],   # Invert Z axis to fix the mirroring issue
+        # Define transformation matrices clearly
+        # IMU to Camera transformation
+        # IMU frame: X=forward, Y=right, Z=up
+        # Camera frame: X=right, Y=down, Z=forward
+        self.R_imu_to_cam = np.array([
+            [0,  1,  0],   # x_cam (right) ← y_imu (right)
+            [0,  0, -1],   # y_cam (down)  ← -z_imu (up becomes down)
+            [1,  0,  0],   # z_cam (forward) ← x_imu (forward)
         ])
-
-        self.R_cam_imu = np.array([
-            [ 0,  0, 1],   # x_cam ← z_imu
-            [-1,  0, 0],   # y_cam ← -x_imu
-            [ 0, -1, 0],   # z_cam ← -y_imu
+        
+        # Camera to world transformation (for visualization)
+        # This converts from camera frame to world frame
+        self.R_cam_to_world = np.array([
+            [1,  0,  0],   # x_cam → x_world
+            [0, -1,  0],   # y_cam → -y_world (flip Y for display)
+            [0,  0, -1],   # z_cam → -z_world (flip Z for display)
         ])
 
     
@@ -99,10 +108,13 @@ class VisualOdometryIMU():
     def set_initial_pose(self, r, t):
         pose = self._form_transf(r, t) 
         self.cur_pose = pose
-        self.current_rotation = r.copy()
+        self.R_world_to_body = r.copy()
 
     def set_initial_imu(self, imu):
         self.imu_current = imu
+        self.R_world_to_body = self.euler_to_rotation_matrix(
+            imu["roll"], imu["pitch"], imu["yaw"]
+        )
 
     @staticmethod
     def _load_calib(filepath):
@@ -141,7 +153,7 @@ class VisualOdometryIMU():
         dt = 0.09
         alpha = self.RC/(self.RC + dt)
 
-        self.acceleration_current = np.array([self.imu_current["agx"],
+        acc_body = np.array([self.imu_current["agx"],
                                  self.imu_current["agy"],
                                  self.imu_current["agz"]], dtype=np.float64)
         
@@ -149,20 +161,26 @@ class VisualOdometryIMU():
                                       self.imu_current["pitch"],
                                       self.imu_current["yaw"])
         
-        self.acceleration_current -= self.g
-        self.acceleration_current = self.R_cam_imu @ self.acceleration_current
+         # Transform acceleration from body frame to world frame
+        # R_world_to_body.T = R_body_to_world
+        acc_world = self.R_world_to_body.T @ acc_body
+        self.acceleration_current = acc_world - self.g
+
+        # self.acceleration_current = self.R_imu_to_cam @ self.acceleration_current
         
         accel_hp = alpha * (self.acceleration_HP + self.acceleration_current -  self.acceleration_prev)
         
-        self.velocity_current = self.velocity_prev + 0.5*(accel_hp+self.acceleration_HP) * dt
-        self.position_current = self.position_prev + self.velocity_prev * dt+0.25 * (accel_hp +self.acceleration_HP) * dt**2
+        self.velocity_world = self.velocity_prev + 0.5*(accel_hp+self.acceleration_HP) * dt
+        self.position_world = self.position_prev + self.velocity_prev * dt+0.25 * (accel_hp +self.acceleration_HP) * dt**2
         
-        d_vo = self.position_current - self.position_prev
+        d_vo = self.position_world - self.position_prev
+        
+        # Update stored values
         self.acceleration_HP = accel_hp
         self.acceleration_prev = self.acceleration_current.copy()
-        self.velocity_prev = self.velocity_current.copy()
-        self.position_prev = self.position_current.copy()
-        self.imu_prev = self.imu_current.copy()
+        self.velocity_prev = self.velocity_world.copy()
+        self.position_prev = self.position_world.copy()
+        
 
         return np.linalg.norm(d_vo)
 
@@ -212,37 +230,50 @@ class VisualOdometryIMU():
             self.update_imu(0.09)
             return
         
+        imu_displacement = self.update_imu(0.09)  # Keep this for future use
+        
         R, t = self.get_pose(q1, q2)
-        t[2] = -t[2]  # Invert Z-axis to match the camera frame
-        
-        # For now, use a simple constsant scale until we get IMU working properly
-        # The original scale of 0.03 was actually closer to correct
-        imu_scale = self.update_imu(0.09)  # Keep this for future use
-        # print(imsu_scale)
-        # Try a larger scale - your original 0.03 might have been closer
-        scale = imu_scale  # Increase this to see if trajectory gets larger
-        t_scaled = t * scale
+        # Firsts transform from camera to body (if needed)
+        t_rel_body = self.R_imu_to_cam.T @ t
 
-        t_world = t_scaled  # Direct assignment
-        R_world = R         # Direct assignments
-        
-        # Don't update rotation for now
-        # self.current_rotation = self.current_rotation @ R_world
-        
-        # Update pose
-        transf = self._form_transf(R_world, t_world)
-        self.cur_pose = np.matmul(self.cur_pose, transf)  # Note: removed inv()
+        t_rel_world = self.R_world_to_body.T @ t_rel_body
 
-        # Store trajectory
-        estimated_rotation, _ = cv2.Rodrigues(self.cur_pose[:3, :3])
+        if imu_displacement > 0.001:  # Only use IMU scale if significant motion
+            scale = min(imu_displacement, 0.1)  # Cap the scale to avoid outliers
+        else:
+            scale = 0.01  # Default small scale
+            
+        t_scaled_world = t_rel_world * scale
+
+        # Transform rotation to world frame
+        R_rel_body = self.R_imu_to_cam.T @ R @ self.R_imu_to_cam
+        R_rel_world = self.R_world_to_body.T @ R_rel_body @ self.R_world_to_body
+
+        # Update global pose
+        # Convert world frame motion back to camera frame for pose update
+        t_cam_for_pose = self.R_cam_to_world.T @ t_scaled_world
+        R_cam_for_pose = self.R_cam_to_world.T @ R_rel_world @ self.R_cam_to_world
+        
+        # Create transformation matrix
+        transf = self._form_transf(R_cam_for_pose, t_cam_for_pose)
+        self.cur_pose = np.matmul(self.cur_pose, np.linalg.inv(transf))
+
+        # Store trajectory (convert to display coordinates)
+        pos_display = self.R_cam_to_world @ self.cur_pose[:3, 3]
+        R_display = self.R_cam_to_world @ self.cur_pose[:3, :3]
+        # pos_display = self.cur_pose[:3, 3]
+        # R_display = self.cur_pose[:3, :3]
+        
+        estimated_rotation, _ = cv2.Rodrigues(R_display)
         self.estimated_path.append((
             estimated_rotation[0, 0],
-            estimated_rotation[1, 0],
+            estimated_rotation[1, 0], 
             estimated_rotation[2, 0],
-            self.cur_pose[0, 3],
-            self.cur_pose[1, 3],
-            self.cur_pose[2, 3]
+            pos_display[0],
+            pos_display[1],
+            pos_display[2]
         ))
+        
 
     def get_current_pose(self):
         if self.cur_pose is not None:

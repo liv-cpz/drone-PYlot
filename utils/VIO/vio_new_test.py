@@ -220,7 +220,7 @@ def main():
         # # Plot ground truth if available
         if gt:
             gt_positions = np.array([p[1] for p in gt])
-            ax1.plot(gt_positions[:, 0], gt_positions[:, 1], gt_positions[:, 2], 
+            ax1.plot(gt_positions[:, 0], gt_positions[:, 1], gt_positions[:,2], 
                     'r--', linewidth=1, label='Ground Truth', alpha=0.5)
   
 
@@ -254,9 +254,9 @@ def main():
         ax2.plot(positions[:, 0], positions[:, 1], 'b-', linewidth=2, label='XY Trajectory')
         ax2.scatter(positions[0, 0], positions[0, 1], c='green', s=100, label='Start', marker='o')
         ax2.scatter(positions[-1, 0], positions[-1, 1], c='red', s=100, label='End', marker='s')
-        ax2.plot(gt_positions[:, 0], gt_positions[:, 1], 
-                    'r--', linewidth=1, label='Ground Truth', alpha=0.5)
-        ax2.set_xlabel('X (m)')s
+        # ax2.plot(gt_positions[:, 0], gt_positions[:, 1], 
+                    # 'r--', linewidth=1, label='Ground Truth', alpha=0.5)
+        ax2.set_xlabel('X (m)')
         ax2.set_ylabel('Y (m)')
         ax2.set_title('Top-Down View (XY Plane)')
         ax2.legend()
