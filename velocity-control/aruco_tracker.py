@@ -157,7 +157,17 @@ if __name__ == '__main__':
 
         # update poses
         Tv, Th = tracker.update(frame)
+        if Th is not None:
+            # extract the camera→horizontal translation
+            x_cam, y_cam, z_cam = Th[:3, 3]
 
+            # map into drone’s own axes
+            dx =  x_cam       # positive → roll right
+            dy =  z_cam       # positive → pitch forward
+            dz = -y_cam       # positive → throttle up
+
+            logger.info(f"Drone corrections  dx={dx:.3f}, dy={dy:.3f}, dz={dz:.3f}")
+            
         # absolute vertical
         if Tv is not None:
             pv = Tv[:3, 3]
