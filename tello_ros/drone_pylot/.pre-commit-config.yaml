@@ -1,0 +1,21 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      # - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-symlinks
+
+
+  - repo: https://github.com/psf/black
+    rev: 22.3.0
+    hooks:
+      - id: black
+        files: ^drone-PYlot/
+        types: [python]
+
+  # - repo: https://github.com/PyCQA/flake8
+  #   rev: 7.0.0
+  #   hooks:
+  #   -   id: flake8

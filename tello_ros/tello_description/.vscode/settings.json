@@ -1,0 +1,36 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/flora/tello_ros_ws/install/tello_msgs/local/lib/python3.10/dist-packages",
+        "/home/flora/turtlebot3_ws/install/turtlebot3_teleop/lib/python3.10/site-packages",
+        "/home/flora/turtlebot3_ws/install/turtlebot3_example/lib/python3.10/site-packages",
+        "/home/flora/turtlebot3_ws/install/turtlebot3_msgs/local/lib/python3.10/dist-packages",
+        "/home/flora/turtlebot3_ws/install/turtlebot3_autorace/lib/python3.10/site-packages",
+        "/home/flora/turtlebot3_ws/install/turtlebot3_autorace_mission/lib/python3.10/site-packages",
+        "/home/flora/turtlebot3_ws/install/turtlebot3_autorace_detect/lib/python3.10/site-packages",
+        "/home/flora/turtlebot3_ws/install/turtlebot3_autorace_camera/lib/python3.10/site-packages",
+        "/home/flora/turtlebot3_ws/install/dynamixel_sdk_custom_interfaces/local/lib/python3.10/dist-packages",
+        "/home/flora/turtlebot3_ws/install/dynamixel_sdk/local/lib/python3.10/dist-packages",
+        "/home/flora/ros2_ws/install/drone_pylot/lib/python3.10/site-packages",
+        "/home/flora/ros2_ws/install/camera_2d_lidar_calibration/lib/python3.10/site-packages",
+        "/home/flora/overlay_ws/devel/lib/python3/dist-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/flora/tello_ros_ws/install/tello_msgs/local/lib/python3.10/dist-packages",
+        "/home/flora/turtlebot3_ws/install/turtlebot3_teleop/lib/python3.10/site-packages",
+        "/home/flora/turtlebot3_ws/install/turtlebot3_example/lib/python3.10/site-packages",
+        "/home/flora/turtlebot3_ws/install/turtlebot3_msgs/local/lib/python3.10/dist-packages",
+        "/home/flora/turtlebot3_ws/install/turtlebot3_autorace/lib/python3.10/site-packages",
+        "/home/flora/turtlebot3_ws/install/turtlebot3_autorace_mission/lib/python3.10/site-packages",
+        "/home/flora/turtlebot3_ws/install/turtlebot3_autorace_detect/lib/python3.10/site-packages",
+        "/home/flora/turtlebot3_ws/install/turtlebot3_autorace_camera/lib/python3.10/site-packages",
+        "/home/flora/turtlebot3_ws/install/dynamixel_sdk_custom_interfaces/local/lib/python3.10/dist-packages",
+        "/home/flora/turtlebot3_ws/install/dynamixel_sdk/local/lib/python3.10/dist-packages",
+        "/home/flora/ros2_ws/install/drone_pylot/lib/python3.10/site-packages",
+        "/home/flora/ros2_ws/install/camera_2d_lidar_calibration/lib/python3.10/site-packages",
+        "/home/flora/overlay_ws/devel/lib/python3/dist-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ]
+}
