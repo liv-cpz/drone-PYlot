@@ -64,12 +64,21 @@ cd ~/ros2_ws/src
 Linux
 ```shell
 cd ~/ros2_ws/src
-git clone <repo>
+git clone --recurse-submodules <repo>
+git submodule update --recursive
 cd ../..
 rosdep install -i --from-path src --rosdistro humble -y
 colcon build
 ```
 
+
+### install DJITelloPy
+```bash
+cd ~/ros2_ws/src/drone-PYlot
+git submodule update --recursive
+cd utils/DJITelloPy
+python3 -m pip install -e .
+```
 
 
 ### Run

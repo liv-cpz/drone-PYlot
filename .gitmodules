@@ -1,0 +1,3 @@
+[submodule "utils/DJITelloPy"]
+	path = utils/DJITelloPy
+	url = https://github.com/damiafuentes/DJITelloPy.git
