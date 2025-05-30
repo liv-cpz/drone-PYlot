@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Optional, Dict, Tuple
 from simple_pid import PID
 import logging
+import pygame
 
 import signal
 import sys
@@ -414,7 +415,6 @@ class TelloTracker:
             fr = myFrame.copy()
             
             Tv, Th = self.aruco_tracker.update(fr)
-
             if Tv is not None and Th is not None and self.tag_track == False:
                 # set flag
                 self.tag_track = True
@@ -485,8 +485,9 @@ class TelloTracker:
                     print(f"dx: {vx}, dy: {vy}, dz: {vz}, vyaw: {vyaw}")
                     self.mytello.send_rc_control(int(vx), int(vy), int(vz), 0)
                     cv2.imwrite(f"POV{idx}.png", img)
+                    update_video(img)
             else:
-
+                update_video(myFrame)
                 if Tv is None and Th is None:
                     self.mytello.land()
                     self.mytello.streamoff()
@@ -531,8 +532,16 @@ class TelloTracker:
             # cv2.imwrite(f"mask_{idx}.jpg", output)
             idx += 1
 
+def update_video(next_frame):
 
+    # Convert to format usable by pygame
+    frame_surface = pygame.surfarray.make_surface(next_frame.swapaxes(0, 1))
 
+    # Render image
+    screen.blit(frame_surface, (0, 0))
+    pygame.display.update()
+
+screen = pygame.display.set_mode((960, 720))
 track_tello = TelloTracker()
 
 def main():
