@@ -17,6 +17,7 @@ The system lets a **DJI Tello EDU** detect a mobile landing platform, align itse
 
 <!-- ——————————————————————————————————— -->
 ## 2 Repository Layout  
+.
 ├── src/
 │ └── main.py # Appendix A – online CV + flight controller
 │ └── drone_terminal_simulator.py # Appendix B – log-polynomial PID tuner
