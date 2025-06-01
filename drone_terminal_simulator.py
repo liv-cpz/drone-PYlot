@@ -51,7 +51,7 @@ class PIDController:
 
 
 class DroneSimulator:
-    def __init__(self, z0=2.0, zf=0.0, duration=10.0, dt=0.01):
+    def __init__(self, z0=0.6, zf=0.0, duration=10.0, dt=0.01):  # <-- z0 changed to 0.6
         self.z0 = z0
         self.zf = zf
         self.dt = dt
@@ -65,9 +65,9 @@ class DroneSimulator:
         self.trajectory = LogPolynomialDescent(z0, zf, duration)
 
         # === PID gains ===
-        kp = 500
-        ki = 0.2
-        kd = 10
+        kp = 120
+        ki = 1
+        kd = 15
         self.controller = PIDController(kp, ki, kd, dt,
                                         output_limits=(-20, 20),
                                         integral_limits=(-5, 5))
@@ -143,7 +143,7 @@ class DroneSimulator:
 
 
 if __name__ == "__main__":
-    sim = DroneSimulator(z0=2.0, zf=0.0, duration=10.0, dt=0.01)
+    sim = DroneSimulator(z0=0.6, zf=0.0, duration=10.0, dt=0.01)
     sim.run()
     sim.print_metrics()
     sim.plot()
