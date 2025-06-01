@@ -17,6 +17,7 @@ The system lets a **DJI Tello EDU** detect a mobile landing platform, align itse
 
 <!-- ——————————————————————————————————— -->
 ## 2 Repository Layout  
+```text
 .
 ├── src/
 │ └── main.py # Appendix A – online CV + flight controller
@@ -27,7 +28,7 @@ The system lets a **DJI Tello EDU** detect a mobile landing platform, align itse
 │ ├── tello_ros/ # tello DJI used from https://github.com/ACFR-RPG/tello-driver-ros?tab=readme-ov-file
 │ └── calibrationdata.tar.gz # Tello drone camera calibration file
 └── README.md
-
+```
 <!-- ——————————————————————————————————— -->
 ## 3 Demostration Videos
 1. Drone landing: https://youtu.be/6jwKVQCQYvo
